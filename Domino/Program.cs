@@ -31,7 +31,7 @@ namespace Domino
 					}
 				}
 
-				dominoes.GenerateAndCheckDominoes(amountOfDominoes);
+				dominoes.GenerateCheckAndPrintDominoes(amountOfDominoes);
 
 				amountOfDominoes = -1;
 			}

@@ -1,5 +1,4 @@
 using Domino;
-using Microsoft.VisualStudio.TestPlatform.Common.DataCollection;
 
 namespace Tests
 {
@@ -15,7 +14,7 @@ namespace Tests
 		[InlineData(7)]
 		[InlineData(11)]
 		[InlineData(30)]
-		public void GetDominos_DominosGeneratedWithXNumberOfDominos_CorrectNumberOfDominosAreCreated(int numberOfDominoesToGenerate)
+		public void GenerateDominos_DominosGeneratedWithXNumberOfDominos_CorrectNumberOfDominosAreCreated(int numberOfDominoesToGenerate)
 		{
 			Dominoes dominoes = CreateSUT();
 
@@ -27,12 +26,13 @@ namespace Tests
 		[Fact]
 		public void CreateDominos_DominosGeneratedWithXNumberOfDominos_AllDominosNumbersAreWithinRange()
 		{
+			5
 			int lowerBound = 0;
 			int upperBound = 6;
 
 			Dominoes dominoes = CreateSUT();
 
-			var result = dominoes.GenerateDominoes(100);
+			var result = dominoes.GenerateDominoes(28);
 
 			foreach (var domino in result)
 			{
@@ -42,6 +42,15 @@ namespace Tests
 					return;
 				}
 			}
+
+			//foreach (var domino in result)
+			//{
+			//	if (domino.Item1 < lowerBound || domino.Item1 > upperBound || domino.Item2 < lowerBound || domino.Item2 > upperBound)
+			//	{
+			//		Assert.Fail("Domino number was out of range");
+			//		return;
+			//	}
+			//}
 		}
 
 		private List<List<(int, int)>> validDominoSets = new()
@@ -53,39 +62,47 @@ namespace Tests
 		[Theory]
 		[InlineData(0)]
 		//[InlineData(1)]
-		public void DominoCircuitExists_ValidCircuitPassedForChecking_ReturnsTrue(int setToCheck)
+		//[InlineData(2)]
+		public void DominoCircuitExists_ValidCircuitPassedForChecking_ResultIsNotNull(int setToCheck)
 		{
 			Dominoes dominoes = CreateSUT();
 
-			var result = dominoes.DominoCircuitExists(validDominoSets[setToCheck]);
+			var result = dominoes.CheckIfCircuitPossible(validDominoSets[setToCheck]);
 
-			Assert.True(result);
+			Assert.NotNull(result);
 		}
 
 		[Fact]
-		public void DominoCircuitExists_InvalidCircuitPassedForChecking_ReturnsFalse()
+		public void DominoCircuitExists_InvalidCircuitPassedForChecking_ResultShouldBeNull()
 		{
 			var invalidDominoCircuit = new List<(int, int)> { (1, 1), (2, 6) };
 
 			Dominoes dominoes = CreateSUT();
 
-			var result = dominoes.DominoCircuitExists(invalidDominoCircuit);
+			var result = dominoes.CheckIfCircuitPossible(invalidDominoCircuit);
 
-			Assert.False(result);
+			Assert.Null(result);
 		}
 
 		[Theory]
 		[InlineData(0)]
 		[InlineData(1)]
-		public void DominoCircuitExists_ZeroOrOneDominoPassedForChecking_ReturnsFalse(int numberOfDominoesToGenerate)
+		public void DominoCircuitExists_ZeroOrOneDominoPassedForChecking_ResultShouldBeNull(int numberOfDominoesToGenerate)
 		{
 			Dominoes dominoes = CreateSUT();
 
 			var dominoSet = dominoes.GenerateDominoes(numberOfDominoesToGenerate);
 
-			var result = dominoes.DominoCircuitExists(dominoSet);
+			var result = dominoes.CheckIfCircuitPossible(dominoSet);
 
-			Assert.False(result);
+			Assert.Null(result);
+		}
+
+		[Fact]
+		public void CheckDominosAndReturnChain_ValidDominoSetPassedForChecking_PrintsCorrectly()
+		{
+			Dominoes dominoes = CreateSUT();
+			var result = dominoes.CheckDominoesAndReturnChain(validDominoSets[0]);
 		}
 	}
 }

@@ -1,23 +1,48 @@
-﻿namespace Domino
+﻿using System.ComponentModel.Design;
+
+namespace Domino
 {
 	public class Dominoes
 	{
-		public void GenerateAndCheckDominoes(int amountOfDominoesToGenerate)
+		public void GenerateCheckAndPrintDominoes(int amountOfDominoesToGenerate)
 		{
-			var Dominoes = GenerateDominoes(amountOfDominoesToGenerate);
+			var dominoes = GenerateDominoes(amountOfDominoesToGenerate);
+			var dominoChainToPrint = CheckDominoesAndReturnChain(dominoes);
 
-			var dominoCircuit = DominoCircuitExists(Dominoes);
+			if (dominoChainToPrint != null)
+			{
+				PrintDominosToScreen(dominoChainToPrint);
+			}
 		}
 
-		private List<(int, int)> GenerateDominoes(int numberToGenerate)
+		public int[,]? CheckDominoesAndReturnChain(List<(int, int)> dominoes)
 		{
+			var dominoCircuit = CheckIfCircuitPossible(dominoes);
+
+			if (dominoCircuit == null)
+			{
+				Console.WriteLine("No circuit was possible with the given dominos");
+				return null;
+			}
+
+			Console.WriteLine("A circuit was possible with the given dominos:");
+			return createDominoPairs(dominoCircuit);
+		}
+
+		public List<(int, int)> GenerateDominoes(int numberToGenerate)
+		{
+			var dominoSet = GenerateDominoSet(6);
+
 			var rand = new Random();
 
 			var dominoes = new List<(int, int)>();
 
+
 			for (int i = 0; i < numberToGenerate; i++)
 			{
-				dominoes.Add((rand.Next(0, 7), rand.Next(0, 7)));
+				int dominoToGetFromSet = rand.Next(0, dominoSet.Count);
+				dominoes.Add(dominoSet[dominoToGetFromSet]);
+				dominoSet.RemoveAt(dominoToGetFromSet);
 			}
 
 			Console.WriteLine($"Generated the following dominoes:");
@@ -27,7 +52,22 @@
 			return dominoes;
 		}
 
-		private List<(int, int)>? DominoCircuitExists(List<(int, int)> dominoes)
+		public List<(int, int)> GenerateDominoSet(int maxNumberOfDots)
+		{
+			var DominoSet = new List<(int, int)>();
+
+			for (int i = 0; i <= maxNumberOfDots; i++)
+			{
+				for (int j = i; j <= maxNumberOfDots; j++)
+				{
+					DominoSet.Add((i, j));
+				}
+			}
+
+			return DominoSet;
+		}
+
+		public List<int>? CheckIfCircuitPossible(List<(int, int)> dominoes)
 		{
 			// Cannot build a chain with no existing dominoes or one domino
 			if (dominoes.Count < 2)
@@ -35,11 +75,6 @@
 				return null;
 			}
 
-			return CheckIfChainPossible(dominoes);
-		}
-
-		private List<(int, int)>? CheckIfChainPossible(List<(int, int)> dominoes)
-		{
 			// Dictionary is created of all nodes with their adjacent nodes
 			var graph = ReturnGraphRepresentationOfDominos(dominoes);
 
@@ -49,8 +84,7 @@
 				return null;
 			}
 
-
-			&& VerifyEulerianCycle(graph);
+			return VerifyEulerianCycle(graph);
 		}
 
 		private static Dictionary<int, List<int>> ReturnGraphRepresentationOfDominos(List<(int, int)> dominoes)
@@ -80,19 +114,20 @@
 			return dominoesGraph.All(x => x.Value.Count % 2 == 0);
 		}
 
-		private static bool VerifyEulerianCycle(Dictionary<int, List<int>> dominoesGraph)
+		private static List<int>? VerifyEulerianCycle(Dictionary<int, List<int>> dominoesGraph)
 		{
 			int startNode = dominoesGraph.FirstOrDefault(x => x.Value.Count > 0).Key;
 
 			// If none of the nodes contains adjacent values, this cannot be a domino chain
 			if (startNode == -1)
 			{
-				return false;
+				return null;
 			}
 
 			Stack<int> stack = new Stack<int>();
 			HashSet<int> visited = new HashSet<int>();
-			List<(int, int)> dominoChain = new List<(int, int)>();
+			//List<(int, int)> dominoChain = new List<(int, int)>();
+			List<int> dominoChain = new List<int>();
 
 			stack.Push(startNode);
 
@@ -105,19 +140,22 @@
 				{
 					// Add the top to the visited hash set
 					visited.Add(top);
+					dominoChain.Add(top);
 
 					// For each of the adjacent values for the current node
 					foreach (var adjacentValue in dominoesGraph[top])
 					{
+
+
+						//// Add to the chain
+						//if (dominoChain.Count == 0 || dominoChain[dominoChain.Count - 1].Item2 == adjacentValue)
+						//	dominoChain.Add((adjacentValue, top));
+						//else if (dominoChain[dominoChain.Count - 1].Item2 == top)
+						//	dominoChain.Add((top, adjacentValue));
+
 						// If the adjacent value does not exist in the visited hash set, push the adjacent value to the stack
 						if (!visited.Contains(adjacentValue))
 						{
-							// Add to the chain
-							if (dominoChain.Count == 0 || dominoChain[dominoChain.Count - 1].Item2 == adjacentValue)
-								dominoChain.Add((adjacentValue, top));
-							else
-								dominoChain.Add((top, adjacentValue));
-
 							// Push adjacent value to the stack
 							stack.Push(adjacentValue);
 						}
@@ -128,10 +166,29 @@
 			foreach (var node in dominoesGraph)
 			{
 				if (node.Value.Count > 0 && !visited.Contains(node.Key))
-					return false;
+					return null;
 			}
 
-			return true;
+
+			//createDominoPairs(dominoChain);
+
+			//return new List<(int, int)>();
+
+			//return createDominoPairs(dominoChain);
+
+			return dominoChain;
+		}
+
+		private static int[,] createDominoPairs(List<int> eulerianCycle)
+		{
+			int[,] pairs = new int[eulerianCycle.Count, 2]; ;
+			for (var i = 0; i < eulerianCycle.Count; i++)
+			{
+				var next = i == eulerianCycle.Count - 1 ? 0 : i + 1;
+				pairs[i, 0] = eulerianCycle[i];
+				pairs[i, 1] = eulerianCycle[next];
+			}
+			return pairs;
 		}
 
 		private static void PrintDominosToScreen(List<(int, int)> dominoes)
@@ -140,6 +197,18 @@
 			{
 				Console.WriteLine(domino);
 			}
+		}
+
+		private static void PrintDominosToScreen(int[,] dominoes)
+		{
+			var listOfDominoes = new List<(int, int)>();
+
+			for (int i = 0; i < dominoes.Length / 2; i++)
+			{
+				listOfDominoes.Add((dominoes[i, 0], dominoes[i, 1]));
+			}
+
+			PrintDominosToScreen(listOfDominoes);
 		}
 	}
 }
