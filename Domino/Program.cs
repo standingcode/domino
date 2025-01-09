@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Domino
+namespace DominoApplication
 {
 	internal class Program
 	{
@@ -14,7 +14,7 @@ namespace Domino
 			{
 				while (amountOfDominoes == -1)
 				{
-					Console.WriteLine("How many dominos would you like to randomly generate? (enter q to quit)");
+					Console.WriteLine("How many dominos would you like to pick? (enter q to quit)");
 					string input = Console.ReadLine().Trim();
 
 					if (input == "q")
@@ -22,11 +22,11 @@ namespace Domino
 
 					int.TryParse(input, out amountOfDominoes);
 
-					if (amountOfDominoes < 1)
+					if (amountOfDominoes < 2 || amountOfDominoes > 28)
 					{
 						amountOfDominoes = -1;
 
-						Console.WriteLine("Please enter a valid number bigger than 0...");
+						Console.WriteLine("Please enter a valid number bigger than or equal to 2 and less than or equal to 28...");
 						Console.WriteLine("");
 					}
 				}

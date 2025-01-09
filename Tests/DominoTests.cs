@@ -1,108 +1,132 @@
-using Domino;
+using DominoApplication;
 
 namespace Tests
 {
 	public class DominoTests
 	{
+
+		private List<List<Domino>> validDominoSets = new()
+		{
+			new List<Domino>() { new Domino(3, 4), new Domino(0, 2), new Domino(0, 0), new Domino(2, 3), new Domino(4, 0) },
+			new List<Domino>() { new Domino(3, 2), new Domino(1, 2), new Domino(3, 1) }
+		};
+
+		private List<List<Domino>> validDominoChains = new() {
+			new List<Domino>() { new Domino(3, 4), new Domino(4, 0), new Domino(0, 0), new Domino(0, 2), new Domino(2, 3) },
+			new List<Domino>() { new Domino(3, 2), new Domino(2, 1), new Domino(1, 3) },
+		};
+
+		private List<List<Domino>> invalidDominoSets = new() {
+			new List<Domino>() { new Domino(3, 4), new Domino(2, 6) },
+			new List<Domino>() { new Domino(3, 2), new Domino(2, 1) },
+		};
+
 		public Dominoes CreateSUT()
 		{
 			return new Dominoes();
 		}
 
+		[Fact]
+		public void GenerateCheckAndPrintDominoes_CalledNormally_NoExceptionsThrown()
+		{
+			var dominoes = CreateSUT();
+
+			dominoes.GenerateCheckAndPrintDominoes(28);
+
+			Assert.True(true);
+		}
+
 		[Theory]
-		[InlineData(0)]
 		[InlineData(7)]
 		[InlineData(11)]
-		[InlineData(30)]
+		[InlineData(28)]
 		public void GenerateDominos_DominosGeneratedWithXNumberOfDominos_CorrectNumberOfDominosAreCreated(int numberOfDominoesToGenerate)
 		{
-			Dominoes dominoes = CreateSUT();
+			var dominoes = CreateSUT();
 
 			var result = dominoes.GenerateDominoes(numberOfDominoesToGenerate);
 
 			Assert.Equal(numberOfDominoesToGenerate, result.Count);
 		}
 
-		[Fact]
-		public void CreateDominos_DominosGeneratedWithXNumberOfDominos_AllDominosNumbersAreWithinRange()
-		{
-			5
-			int lowerBound = 0;
-			int upperBound = 6;
-
-			Dominoes dominoes = CreateSUT();
-
-			var result = dominoes.GenerateDominoes(28);
-
-			foreach (var domino in result)
-			{
-				if (domino.Item1 < lowerBound || domino.Item1 > upperBound || domino.Item2 < lowerBound || domino.Item2 > upperBound)
-				{
-					Assert.Fail("Domino number was out of range");
-					return;
-				}
-			}
-
-			//foreach (var domino in result)
-			//{
-			//	if (domino.Item1 < lowerBound || domino.Item1 > upperBound || domino.Item2 < lowerBound || domino.Item2 > upperBound)
-			//	{
-			//		Assert.Fail("Domino number was out of range");
-			//		return;
-			//	}
-			//}
-		}
-
-		private List<List<(int, int)>> validDominoSets = new()
-		{
-			new List<(int, int)> { (3, 4), (0, 2), (0, 0), (2, 3), (4, 0) },
-			new List<(int, int)> { (0, 0), (0, 0) }
-		};
-
 		[Theory]
 		[InlineData(0)]
-		//[InlineData(1)]
-		//[InlineData(2)]
-		public void DominoCircuitExists_ValidCircuitPassedForChecking_ResultIsNotNull(int setToCheck)
+		[InlineData(1)]
+		public void TryAndBuildChainsAndReturnFirstWorkingCircuit_ValidDominoSetPassedForChecking_CorrectChainReturned(int index)
 		{
-			Dominoes dominoes = CreateSUT();
+			var set = validDominoSets[index];
+			var chain = validDominoChains[index];
 
-			var result = dominoes.CheckIfCircuitPossible(validDominoSets[setToCheck]);
+			var dominoes = CreateSUT();
 
-			Assert.NotNull(result);
-		}
+			var result = dominoes.TryAndBuildChainsAndReturnFirstWorkingCircuit(set.Count, new List<Domino>(), set);
 
-		[Fact]
-		public void DominoCircuitExists_InvalidCircuitPassedForChecking_ResultShouldBeNull()
-		{
-			var invalidDominoCircuit = new List<(int, int)> { (1, 1), (2, 6) };
+			if (result == null)
+			{
+				Assert.Fail();
+			}
 
-			Dominoes dominoes = CreateSUT();
-
-			var result = dominoes.CheckIfCircuitPossible(invalidDominoCircuit);
-
-			Assert.Null(result);
+			for (int i = 0; i < result?.Count; i++)
+			{
+				if (!(result[i].First == chain[i].First && result[i].Second == chain[i].Second))
+				{
+					Assert.Fail();
+				}
+			}
 		}
 
 		[Theory]
 		[InlineData(0)]
 		[InlineData(1)]
-		public void DominoCircuitExists_ZeroOrOneDominoPassedForChecking_ResultShouldBeNull(int numberOfDominoesToGenerate)
+		public void TryAndBuildChainsAndReturnFirstWorkingCircuit_InvalidCircuitPassedForChecking_ResultShouldBeNull(int index)
 		{
-			Dominoes dominoes = CreateSUT();
+			var invalidSet = invalidDominoSets[index];
 
-			var dominoSet = dominoes.GenerateDominoes(numberOfDominoesToGenerate);
+			var dominoes = CreateSUT();
 
-			var result = dominoes.CheckIfCircuitPossible(dominoSet);
+			var result = dominoes.TryAndBuildChainsAndReturnFirstWorkingCircuit(invalidSet.Count, new List<Domino>(), invalidSet);
 
 			Assert.Null(result);
 		}
 
 		[Fact]
-		public void CheckDominosAndReturnChain_ValidDominoSetPassedForChecking_PrintsCorrectly()
+		public void CreateValueCopyOfDominoList_ValidDominoListPassed_CorrectCopyReturned()
 		{
-			Dominoes dominoes = CreateSUT();
-			var result = dominoes.CheckDominoesAndReturnChain(validDominoSets[0]);
+			var set = validDominoSets[0];
+
+			var result = Dominoes.CreateValueCopyOfDominoList(set);
+
+			for (int i = 0; i < result.Count; i++)
+			{
+				if (!(result[i].First == set[i].First && result[i].Second == set[i].Second))
+				{
+					Assert.Fail();
+				}
+			}
+		}
+
+		[Fact]
+		public void GenerateDominoSet_maxNumberOfDotsDefinedAs6_28DominosCreated()
+		{
+			var result = Dominoes.GenerateDominoSet(6);
+
+			Assert.Equal(28, result.Count);
+		}
+
+		[Fact]
+		public void CanAddDominoToChain_DominoPassedWhichCanBeAdded_ReturnsTrue()
+		{
+			var result = Dominoes.CanAddDominoToChain(new Domino(3, 4), new List<Domino>() { new Domino(0, 3) });
+
+			Assert.True(result);
+		}
+
+		[Fact]
+		public void CanAddDominoToChain_DominoPassedWhichCannotBeAdded_ReturnsFalse()
+		{
+			var result = Dominoes.CanAddDominoToChain(new Domino(3, 4), new List<Domino>() { new Domino(4, 0) });
+
+			Assert.False(result);
 		}
 	}
 }
