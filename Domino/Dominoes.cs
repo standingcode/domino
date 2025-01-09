@@ -36,12 +36,18 @@ namespace DominoApplication
 
 			if (successfulDominoChain == null)
 			{
+				Console.WriteLine("----------------------------------------------");
 				Console.WriteLine("No circuit was possible with the given dominos");
+				Console.WriteLine("----------------------------------------------");
+
 				return;
 			}
 
+			Console.WriteLine("----------------------------------------------");
 			Console.WriteLine("A circuit was possible with the given dominos:");
 			PrintDominosToScreen(successfulDominoChain);
+			Console.WriteLine("----------------------------------------------");
+
 		}
 
 		public List<Domino> GenerateDominoes(int numberToGenerate)

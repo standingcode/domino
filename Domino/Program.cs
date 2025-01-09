@@ -26,8 +26,7 @@ namespace DominoApplication
 					{
 						amountOfDominoes = -1;
 
-						Console.WriteLine("Please enter a valid number bigger than or equal to 3 and less than or equal to 28...");
-						Console.WriteLine("");
+						Console.WriteLine("Please enter a valid number bigger than or equal to 3 and less than or equal to 28...\n");
 					}
 				}
 
