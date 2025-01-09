@@ -22,11 +22,11 @@ namespace DominoApplication
 
 					int.TryParse(input, out amountOfDominoes);
 
-					if (amountOfDominoes < 2 || amountOfDominoes > 28)
+					if (amountOfDominoes < 3 || amountOfDominoes > 28)
 					{
 						amountOfDominoes = -1;
 
-						Console.WriteLine("Please enter a valid number bigger than or equal to 2 and less than or equal to 28...");
+						Console.WriteLine("Please enter a valid number bigger than or equal to 3 and less than or equal to 28...");
 						Console.WriteLine("");
 					}
 				}
